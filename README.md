@@ -44,3 +44,6 @@ O aplicativo utiliza uma paleta de cores em tons de verde e bege, proporcionando
 - **Adicionar Livro** - Formulário de registro
 - **Detalhes do Livro** - Visualização completa
 - **Editar Livro** - Atualização de informações
+
+## Considerações Finais
+Este projeto demonstra a aplicação de conceitos de desenvolvimento mobile com React Native, integração com serviços Firebase e construção de uma aplicação completa com autenticação e banco de dados em tempo real. A interface foi projetada para ser intuitiva e acessível, proporcionando uma boa experiência ao usuário final.
