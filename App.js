@@ -1,64 +1,83 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, ActivityIndicator } from 'react-native';
-import firebase from './config/config';
-
-import LoginScreen from './screens/LoginScreen';
-import RegistroScreen from './screens/RegistroScreen';
-
-const Stack = createNativeStackNavigator();
+import * as React from 'react';
+import { View } from 'react-native';
+import Login from './components/Login';
+import Cadastro from './components/Cadastro';
+import Home from './components/Home';
+import AdicionarLivro from './components/AdicionarLivro';
+import DetalhesLivro from './components/DetalhesLivro';
+import EditarLivro from './components/EditarLivro';
 
 export default function App() {
-  const [carregando, setCarregando] = React.useState(true);
+  const [telaAtual, setTelaAtual] = React.useState('Login');
   const [usuario, setUsuario] = React.useState(null);
+  const [livroSelecionado, setLivroSelecionado] = React.useState(null);
 
-  // Verifica se o usuário já está logado ao iniciar o app
-  React.useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      setUsuario(user);
-      setCarregando(false);
-    });
+  const fazerLogin = (user) => {
+    setUsuario(user);
+    setTelaAtual('Home');
+  };
 
-    return () => unsubscribe();
-  }, []);
+  const fazerLogout = () => {
+    setUsuario(null);
+    setTelaAtual('Login');
+  };
 
-  if (carregando) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#2E8B57" />
-      </View>
-    );
-  }
+  const atualizarLivro = (livroAtualizado) => {
+    setLivroSelecionado(livroAtualizado);
+    setTelaAtual('DetalhesLivro');
+  };
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        {usuario ? (
-          // Telas quando o usuário ESTÁ logado (serão adicionadas no Commit 4)
-          <Stack.Screen 
-            name="ListaLivros" 
-            component={() => <View><Text>Lista de Livros (em construção)</Text></View>} 
-          />
-        ) : (
-          // Telas quando o usuário NÃO está logado
-          <>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }} // Esconde o cabeçalho
-            />
-            <Stack.Screen
-              name="Registro"
-              component={RegistroScreen}
-              options={{ 
-                title: 'Criar Conta',
-                headerTintColor: '#2E8B57', // Cor do texto do cabeçalho
-              }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={{ flex: 1 }}>
+      {telaAtual === 'Login' && (
+        <Login 
+          onLogin={fazerLogin} 
+          onCadastro={() => setTelaAtual('Cadastro')} 
+        />
+      )}
+      
+      {telaAtual === 'Cadastro' && (
+        <Cadastro 
+          onCadastroSucesso={fazerLogin} 
+          onVoltar={() => setTelaAtual('Login')} 
+        />
+      )}
+      
+      {telaAtual === 'Home' && (
+        <Home 
+          usuario={usuario} 
+          onLogout={fazerLogout}
+          onAdicionarLivro={() => setTelaAtual('AdicionarLivro')}
+          onVerDetalhes={(livro) => {
+            setLivroSelecionado(livro);
+            setTelaAtual('DetalhesLivro');
+          }}
+        />
+      )}
+
+      {telaAtual === 'AdicionarLivro' && (
+        <AdicionarLivro 
+          usuario={usuario}
+          onVoltar={() => setTelaAtual('Home')}
+        />
+      )}
+
+      {telaAtual === 'DetalhesLivro' && (
+        <DetalhesLivro 
+          livro={livroSelecionado}
+          onVoltar={() => setTelaAtual('Home')}
+          onEditar={() => setTelaAtual('EditarLivro')}
+        />
+      )}
+
+      {telaAtual === 'EditarLivro' && (
+        <EditarLivro 
+          livro={livroSelecionado}
+          usuario={usuario}
+          onVoltar={() => setTelaAtual('DetalhesLivro')}
+          onSalvar={atualizarLivro}
+        />
+      )}
+    </View>
   );
 }
